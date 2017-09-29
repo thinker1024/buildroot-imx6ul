@@ -1,21 +1,23 @@
 #!/bin/sh
 #
-# Start the network....
+# Start the usb wifi....
 #
 
-# Debian ifupdown needs the /run/network lock directory
-mkdir -p /run/network
+DAEMON=wpa_supplicant
+ARGS="-Dnl80211 -iwlan0 -c/etc/wpa_supplicant.conf -B"
 
 case "$1" in
   start)
-	printf "Starting network: "
-	wpa_supplicant -Dnl80211 -iwlan0 -c/etc/wpa_supplicant_lab.conf -B
+	printf "Starting usb wifi: "
+	start-stop-daemon -S -q -x $DAEMON -- $ARGS
+
+    sleep 1
 	udhcpc -i wlan0
 	[ $? = 0 ] && echo "OK" || echo "FAIL"
 	;;
   stop)
 	printf "Stopping usb wifi: "
-	/sbin/ifdown -a
+	start-stop-daemon -K -q -n $DAEMON	
 	[ $? = 0 ] && echo "OK" || echo "FAIL"
 	;;
   restart|reload)
