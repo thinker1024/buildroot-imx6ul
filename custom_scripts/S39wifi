@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Start the usb wifi....
+#
+
+DAEMON=wpa_supplicant
+ARGS="-Dnl80211 -iwlan0 -c/etc/wpa_supplicant.conf -B"
+
+case "$1" in
+  start)
+	printf "Starting usb wifi: "
+	start-stop-daemon -S -q -x $DAEMON -- $ARGS
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+	;;
+  stop)
+	printf "Stopping usb wifi: "
+	start-stop-daemon -K -q -n $DAEMON	
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+	;;
+  restart|reload)
+	"$0" stop
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+

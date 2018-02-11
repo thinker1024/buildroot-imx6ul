@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Starts zigpy Zigbee Gateway.
+#
+
+app="/usr/bin/zigpy"
+
+if [ ! -x $app ]
+then
+	exit 0
+fi
+
+start() {
+        ZIGPY_ARGS="-d /dev/ttymxc2"
+	echo -n "Starting zigbee gateway: "
+        umask 077
+	start-stop-daemon -S -m -b -q -p /var/run/zigpy_gateway.pid \
+		--exec /usr/bin/zigpy -- $ZIGPY_ARGS
+	[ $? == 0 ] && echo "OK" || echo "FAIL"
+	sleep 5
+}
+stop() {
+	echo -n "Stopping zigbee gateway: "
+	start-stop-daemon -K -q -p /var/run/zigpy_gateway.pid
+	[ $? == 0 ] && echo "OK" || echo "FAIL"
+}
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|reload)
+  	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+
